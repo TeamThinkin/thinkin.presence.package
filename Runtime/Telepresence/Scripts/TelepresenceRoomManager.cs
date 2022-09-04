@@ -96,7 +96,7 @@ public class TelepresenceRoomManager : RealtimeComponent<TelepresenceRoomManager
             Debug.Log("We are the first one here. Creating network syncs...");
             foreach (var presenter in DestinationPresenter.Instance.RootPresenter.All())
             {
-                presenter.CreateNetworkSync();
+                //presenter.CreateNetworkSync(); 
             }
         }
     }
