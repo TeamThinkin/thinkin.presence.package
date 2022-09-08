@@ -16,7 +16,7 @@ public class TelepresenceRoomManager : RealtimeComponent<TelepresenceRoomManager
     public bool IsConnected => _normcore.connected;
 
     public int ClientId => _normcore.clientID;
-    
+
 
     public IEnumerable<UserInfoModel> ConnectedUsers
     {
@@ -70,7 +70,6 @@ public class TelepresenceRoomManager : RealtimeComponent<TelepresenceRoomManager
     public void AddUser(UserInfoModel UserInfo)
     {
         if (model == null) return;
-
         var newEntry = UserInfo.Clone();
 
         model.connectedUsers.Add(newEntry);
@@ -90,16 +89,30 @@ public class TelepresenceRoomManager : RealtimeComponent<TelepresenceRoomManager
 
     private void _normcore_didConnectToRoom(Realtime realtime)
     {
-        bool isFirstOneHere = model.connectedUsers.Count == 0;
+        bool isFirstOneHere = !model.connectedUsers.Any(i => i.clientId != this.ClientId);
+        
         if (isFirstOneHere)
         {
             Debug.Log("We are the first one here. Creating network syncs...");
-            foreach (var presenter in DestinationPresenter.Instance.RootPresenter.All())
+            createNetworkSyncs();
+        }
+        else Debug.Log("Normcore connected, but we are not the first one here. Assuming syncs already created. Connected User Count: " + model.connectedUsers.Count);
+    }
+
+    private void createNetworkSyncs()
+    {
+        foreach(var entry in NetworkSyncFactory.SyncTypes)
+        {
+            var items = GameObject.FindObjectsOfType(entry.Key);
+            foreach(var item in items)
             {
-                //presenter.CreateNetworkSync(); 
+                var targetItem = (item as MonoBehaviour).gameObject;
+                var sync = NetworkSyncFactory.FindOrCreateNetworkSync(targetItem, entry.Value.PrefabPath);
+                sync.RequestSyncOwnership();
             }
         }
     }
+    
 
     protected override void OnRealtimeModelReplaced(TelepresenceRoomManagerModel previousModel, TelepresenceRoomManagerModel currentModel)
     {
