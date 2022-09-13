@@ -14,6 +14,8 @@ public class GrabbableSync : RealtimeComponent<GrabbableSyncModel>, INetworkSync
 
     public GameObject TargetItem { get; private set; }
 
+    private IGrabbable grabbable;
+
     public void SetTarget(GameObject LocalTarget)
     {
         TargetItem = LocalTarget;
@@ -27,49 +29,9 @@ public class GrabbableSync : RealtimeComponent<GrabbableSyncModel>, INetworkSync
 
     public void RequestSyncOwnership()
     {
-        Debug.Log("Requesting ownership of GrabbableSync");
         NetworkItem.RequestOwnership();
         NetworkTransform.RequestOwnership();
     }
-
-    //public static GrabbableSync FindOrCreate(GameObject TargetItem, string SpawnUrl = null)
-    //{
-    //    if (!TelepresenceRoomManager.Instance.IsConnected) return null;
-
-    //    string key = TargetItem.name;
-
-    //    if (Syncs.ContainsKey(key))
-    //    {
-    //        var sync = Syncs[key];
-    //        sync.RequestTransformOwnership();
-    //        return sync;
-    //    }
-    //    else
-    //    {
-    //        var sync = Normal.Realtime.Realtime.Instantiate("Prefabs/NetworkItemSync", Normal.Realtime.Realtime.InstantiateOptions.defaults).GetComponent<GrabbableSync>();
-    //        sync.model.key = key;
-    //        sync.model.spawnUrl = SpawnUrl;
-    //        sync.model.spawnParentKey = TargetItem.transform.parent.gameObject.name;
-    //        sync.RequestTransformOwnership();
-    //        Syncs.Add(key, sync);
-    //        return sync;
-    //    }
-    //}
-
-    //TODO: commented out during the Package refactor
-    //public static void MakeGrabbable(GameObject item) //TODO: This method doesnt belong in the class, need to find a way to create the same item in DispenserItem as when its spawned in this class
-    //{
-    //    var body = item.AddComponent<Rigidbody>();
-    //    body.useGravity = false;
-    //    body.drag = 0.2f;
-    //    body.angularDrag = 0.2f;
-    //    //body.isKinematic = true;
-    //    //checkPhysicsMaterials(item);
-
-    //    item.AddComponent<Grabbable>();
-    //    item.AddComponent<DistanceGrabbable>();
-    //    item.AddComponent<GrabSyncMonitor>();
-    //}
 
     private void OnDestroy()
     {
@@ -77,6 +39,11 @@ public class GrabbableSync : RealtimeComponent<GrabbableSyncModel>, INetworkSync
         if (entry.Value == this)
         {
             Syncs.Remove(entry.Key);
+        }
+
+        if(grabbable != null)
+        {
+            grabbable.OnGrab -= Grabbable_OnGrab;
         }
     }
 
@@ -87,11 +54,11 @@ public class GrabbableSync : RealtimeComponent<GrabbableSyncModel>, INetworkSync
         if (NetworkTransform.isOwnedLocallySelf)
         {
             copyTransform(TargetItem.transform, this.transform);
-            Debug.Log("Copying local position to remote objects: " + TargetItem.name);
+            //Debug.Log("Copying local position to remote objects: " + TargetItem.name);
         }
         else
         {
-            Debug.Log("Copy remote position to local object: " + TargetItem.name);
+            //Debug.Log("Copy remote position to local object: " + TargetItem.name);
             copyTransform(this.transform, TargetItem.transform);
         }
     }
@@ -123,24 +90,46 @@ public class GrabbableSync : RealtimeComponent<GrabbableSyncModel>, INetworkSync
             Debug.Log("Spawning new item: *" + model.spawnUrl + "* *" + model.key + "*");
 
             var address = new AssetUrl(model.spawnUrl);
-            Debug.Log(address.CatalogUrl);
-            Debug.Log(address.AssetPath);
-
             var prefab = await AssetBundleManager.LoadPrefab(address);
             var parentObject = GameObject.Find(model.spawnParentKey);
             TargetItem = Instantiate(prefab, parentObject?.transform);
             TargetItem.name = model.key;
 
             AppControllerBase.Instance.UIManager.MakeGrabbalbe(TargetItem);
+
+            onNewTargetItem();
         }
     }
 
     private void Model_keyDidChange(GrabbableSyncModel model, string value)
     {
         if (!string.IsNullOrEmpty(model.key))
+        {
+            Debug.Log("Grabbable Sync Key changed, looking for Target Item in scene: " + model.spawnUrl);
             TargetItem = GameObject.Find(model.key);
+            onNewTargetItem();
+        }
+        else TargetItem = null;
+    }
+
+    private void onNewTargetItem()
+    {
+        if (TargetItem == null) return;
+
+        var grabbable = TargetItem.GetComponent<IGrabbable>();
+        if(grabbable != null)
+        {
+            grabbable.OnGrab += Grabbable_OnGrab;
+        }
         else
-            TargetItem = null;
+        {
+            Debug.Log("New Target Item does not have an IGrabbable component");
+        }
+    }
+
+    private void Grabbable_OnGrab(IGrabber Grabber, IGrabbable Grabbable)
+    {
+        RequestSyncOwnership();
     }
 
     private void copyTransform(Transform sourceItem, Transform destinationItem)

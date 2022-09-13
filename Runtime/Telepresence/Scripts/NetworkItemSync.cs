@@ -43,21 +43,6 @@ public class NetworkItemSync : RealtimeComponent<NetworkItemSyncModel>
         }
     }
 
-    //TODO: commented out during the Package refactor
-    //public static void MakeGrabbable(GameObject item) //TODO: This method doesnt belong in the class, need to find a way to create the same item in DispenserItem as when its spawned in this class
-    //{
-    //    var body = item.AddComponent<Rigidbody>();
-    //    body.useGravity = false;
-    //    body.drag = 0.2f;
-    //    body.angularDrag = 0.2f;
-    //    //body.isKinematic = true;
-    //    //checkPhysicsMaterials(item);
-
-    //    item.AddComponent<Grabbable>();
-    //    item.AddComponent<DistanceGrabbable>();
-    //    item.AddComponent<GrabSyncMonitor>();
-    //}
-
     private void OnDestroy()
     {
         var entry = Syncs.FirstOrDefault(i => i.Value == this);

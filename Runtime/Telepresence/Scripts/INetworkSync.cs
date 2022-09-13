@@ -6,4 +6,7 @@ public interface INetworkSync
 {
     void SetTarget(GameObject LocalTarget);
     void RequestSyncOwnership();
+
+    Transform transform { get; }
+    GameObject gameObject { get; }
 }
