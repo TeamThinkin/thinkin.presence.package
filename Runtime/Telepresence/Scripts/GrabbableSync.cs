@@ -95,7 +95,7 @@ public class GrabbableSync : RealtimeComponent<GrabbableSyncModel>, INetworkSync
             TargetItem = Instantiate(prefab, parentObject?.transform);
             TargetItem.name = model.key;
 
-            AppControllerBase.Instance.UIManager.MakeGrabbalbe(TargetItem);
+            AppControllerBase.Instance.UIManager.MakeGrabbable(TargetItem);
 
             onNewTargetItem();
         }
