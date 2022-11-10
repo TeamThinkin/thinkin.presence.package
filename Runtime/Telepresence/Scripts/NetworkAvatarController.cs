@@ -14,8 +14,18 @@ public class NetworkAvatarController : RealtimeComponent<UserInfoModel>
     [SerializeField] private MouthMoveBlendShape MouthMover;
     [SerializeField] private NetworkAvatarHandController LeftHand;
     [SerializeField] private NetworkAvatarHandController RightHand;
+    [SerializeField] private AudioSource MouthAudioSource;
 
     private SkinController currentSkin;
+
+    public UserInfoModel Model => model;
+    public bool IsLocalUser { get; private set; }
+
+    public bool IsMuted
+    {
+        get { return MouthAudioSource.mute; }
+        set { MouthAudioSource.mute = value; }
+    }
 
     private void Awake()
     {
@@ -41,7 +51,8 @@ public class NetworkAvatarController : RealtimeComponent<UserInfoModel>
 
         if (model != null)
         {
-            TelepresenceRoomManager.Instance.RemoveUser(model);
+            TelepresenceRoomManager.Instance.UnregisterNetworkUser(this);
+
             model.displayNameDidChange -= CurrentModel_displayNameDidChange;
 
             if (model.isOwnedLocallyInHierarchy)
@@ -64,17 +75,17 @@ public class NetworkAvatarController : RealtimeComponent<UserInfoModel>
             if (currentModel.isOwnedLocallyInHierarchy)
             {
                 //Local avatar
+                IsLocalUser = true;
                 gameObject.name = "Network Avatar (Local)";
                 UserInfo.OnCurrentUserChanged += UserInfo_OnCurrentUserChanged;
                 updateModelFromUserInfo();
                 model.clientId = TelepresenceRoomManager.Instance.ClientId;
                 linkMouthMover();
-
-                TelepresenceRoomManager.Instance.AddUser(model);
             }
             else
             {
                 //Remote avatar
+                IsLocalUser = false;
                 gameObject.name = "Network Avatar (Remote)";
                 currentModel.avatarUrlDidChange += CurrentModel_avatarUrlDidChange;
                 updateSkin(currentModel.avatarUrl);
@@ -82,6 +93,8 @@ public class NetworkAvatarController : RealtimeComponent<UserInfoModel>
 
             currentModel.displayNameDidChange += CurrentModel_displayNameDidChange;
             updateDisplayName();
+
+            TelepresenceRoomManager.Instance.RegisterNetworkUser(this);
         }
     }
     

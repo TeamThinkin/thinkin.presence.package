@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class TelepresenceRoomManager : RealtimeComponent<TelepresenceRoomManagerModel>
+public class TelepresenceRoomManager : MonoBehaviour // RealtimeComponent<TelepresenceRoomManagerModel>
 {
     public event Action OnUserListChanged;
 
@@ -18,19 +18,9 @@ public class TelepresenceRoomManager : RealtimeComponent<TelepresenceRoomManager
     public int ClientId => _normcore.clientID;
 
 
-    public IEnumerable<UserInfoModel> ConnectedUsers
-    {
-        get
-        {
-            if (model != null)
-            {
-                foreach (var item in model.connectedUsers)
-                {
-                    yield return item;
-                }
-            }
-        }
-    }
+    private List<NetworkAvatarController> networkUsers = new List<NetworkAvatarController>();
+    public List<NetworkAvatarController> NetworkUsers => networkUsers;
+
 
     private void Awake()
     {
@@ -46,11 +36,11 @@ public class TelepresenceRoomManager : RealtimeComponent<TelepresenceRoomManager
         DestinationPresenter.OnDestinationLoaded -= DestinationPresenter_OnDestinationLoaded;
         DestinationPresenter.OnDestinationUnloaded -= DestinationPresenter_OnDestinationUnloaded;
 
-        if (model != null)
-        {
-            model.connectedUsers.modelAdded -= ConnectedUsers_modelAdded;
-            model.connectedUsers.modelRemoved -= ConnectedUsers_modelRemoved;
-        }
+        //if (model != null)
+        //{
+        //    model.connectedUsers.modelAdded -= ConnectedUsers_modelAdded;
+        //    model.connectedUsers.modelRemoved -= ConnectedUsers_modelRemoved;
+        //}
     }
 
     private void DestinationPresenter_OnDestinationLoaded()
@@ -65,38 +55,34 @@ public class TelepresenceRoomManager : RealtimeComponent<TelepresenceRoomManager
     {
         if (!enabled) return;
         _normcore.Disconnect();
-    }
+    }    
 
-    public void AddUser(UserInfoModel UserInfo)
+    public void RegisterNetworkUser(NetworkAvatarController user)
     {
-        if (model == null) return;
-        var newEntry = UserInfo.Clone();
+        if (networkUsers.Contains(user)) return;
 
-        model.connectedUsers.Add(newEntry);
+        networkUsers.Add(user);
         OnUserListChanged?.Invoke();
     }
 
-    public void RemoveUser(UserInfoModel UserInfo)
+    public void UnregisterNetworkUser(NetworkAvatarController user)
     {
-        if (model == null) return;
-        var entry = model.connectedUsers.SingleOrDefault(i => i.clientId == UserInfo.clientId);
-        if (entry != null)
-        {
-            model.connectedUsers.Remove(entry);
-            OnUserListChanged?.Invoke();
-        }
+        networkUsers.Remove(user);
+        OnUserListChanged?.Invoke();
     }
+
 
     private void _normcore_didConnectToRoom(Realtime realtime)
     {
-        bool isFirstOneHere = !model.connectedUsers.Any(i => i.clientId != this.ClientId);
+        //bool isFirstOneHere = !model.connectedUsers.Any(i => i.clientId != this.ClientId);
+        bool isFirstOneHere = networkUsers.Count <= 1; //networkUsers.Any(i => i.Model.clientId != this.ClientId);
         
         if (isFirstOneHere)
         {
             Debug.Log("We are the first one here. Creating network syncs...");
             createNetworkSyncs();
         }
-        else Debug.Log("Normcore connected, but we are not the first one here. Assuming syncs already created. Connected User Count: " + model.connectedUsers.Count);
+        else Debug.Log("Normcore connected, but we are not the first one here. Assuming syncs already created. Connected User Count: " + networkUsers.Count);
     }
 
     private void createNetworkSyncs()
@@ -114,30 +100,30 @@ public class TelepresenceRoomManager : RealtimeComponent<TelepresenceRoomManager
     }
     
 
-    protected override void OnRealtimeModelReplaced(TelepresenceRoomManagerModel previousModel, TelepresenceRoomManagerModel currentModel)
-    {
-        base.OnRealtimeModelReplaced(previousModel, currentModel);
+    //protected override void OnRealtimeModelReplaced(TelepresenceRoomManagerModel previousModel, TelepresenceRoomManagerModel currentModel)
+    //{
+    //    base.OnRealtimeModelReplaced(previousModel, currentModel);
 
-        if(previousModel != null)
-        {
-            previousModel.connectedUsers.modelAdded -= ConnectedUsers_modelAdded;
-            previousModel.connectedUsers.modelRemoved -= ConnectedUsers_modelRemoved;
-        }
+    //    if(previousModel != null)
+    //    {
+    //        previousModel.connectedUsers.modelAdded -= ConnectedUsers_modelAdded;
+    //        previousModel.connectedUsers.modelRemoved -= ConnectedUsers_modelRemoved;
+    //    }
 
-        if(currentModel != null)
-        {
-            currentModel.connectedUsers.modelAdded += ConnectedUsers_modelAdded;
-            currentModel.connectedUsers.modelRemoved += ConnectedUsers_modelRemoved;
-        }
-    }
+    //    if(currentModel != null)
+    //    {
+    //        currentModel.connectedUsers.modelAdded += ConnectedUsers_modelAdded;
+    //        currentModel.connectedUsers.modelRemoved += ConnectedUsers_modelRemoved;
+    //    }
+    //}
 
-    private void ConnectedUsers_modelRemoved(Normal.Realtime.Serialization.RealtimeSet<UserInfoModel> set, UserInfoModel model, bool remote)
-    {
-        OnUserListChanged?.Invoke();
-    }
+    //private void ConnectedUsers_modelRemoved(Normal.Realtime.Serialization.RealtimeSet<UserInfoModel> set, UserInfoModel model, bool remote)
+    //{
+    //    OnUserListChanged?.Invoke();
+    //}
 
-    private void ConnectedUsers_modelAdded(Normal.Realtime.Serialization.RealtimeSet<UserInfoModel> set, UserInfoModel model, bool remote)
-    {
-        OnUserListChanged?.Invoke();
-    }
+    //private void ConnectedUsers_modelAdded(Normal.Realtime.Serialization.RealtimeSet<UserInfoModel> set, UserInfoModel model, bool remote)
+    //{
+    //    OnUserListChanged?.Invoke();
+    //}
 }
