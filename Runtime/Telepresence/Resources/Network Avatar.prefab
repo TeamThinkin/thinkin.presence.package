@@ -416,6 +416,7 @@ MonoBehaviour:
   LeftHand: {fileID: 3315303882633683967}
   RightHand: {fileID: 5928414646956851947}
   MouthAudioSource: {fileID: 3681959943335904041}
+  Voice: {fileID: 114483422340737214}
 --- !u!1 &1677690864260768
 GameObject:
   m_ObjectHideFlags: 0

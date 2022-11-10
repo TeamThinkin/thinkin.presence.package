@@ -15,6 +15,7 @@ public class NetworkAvatarController : RealtimeComponent<UserInfoModel>
     [SerializeField] private NetworkAvatarHandController LeftHand;
     [SerializeField] private NetworkAvatarHandController RightHand;
     [SerializeField] private AudioSource MouthAudioSource;
+    [SerializeField] private RealtimeAvatarVoice Voice;
 
     private SkinController currentSkin;
 
@@ -23,9 +24,15 @@ public class NetworkAvatarController : RealtimeComponent<UserInfoModel>
 
     public bool IsMuted
     {
-        get { return MouthAudioSource.mute; }
-        set { MouthAudioSource.mute = value; }
+        get { return Voice.mute; }
+        set { Voice.mute = value; }
     }
+
+    //public bool IsMuted
+    //{
+    //    get { return MouthAudioSource.mute; }
+    //    set { MouthAudioSource.mute = value; }
+    //}
 
     private void Awake()
     {

@@ -8,6 +8,7 @@ using UnityEngine;
 public class TelepresenceRoomManager : MonoBehaviour // RealtimeComponent<TelepresenceRoomManagerModel>
 {
     public event Action OnUserListChanged;
+    public event Action OnConnectionStatusChanged;
 
     public static TelepresenceRoomManager Instance { get; private set; }
 
@@ -26,13 +27,17 @@ public class TelepresenceRoomManager : MonoBehaviour // RealtimeComponent<Telepr
     {
         Instance = this;
         _normcore.didConnectToRoom += _normcore_didConnectToRoom;
+        _normcore.didDisconnectFromRoom += _normcore_didDisconnectFromRoom;
         DestinationPresenter.OnDestinationLoaded += DestinationPresenter_OnDestinationLoaded;
         DestinationPresenter.OnDestinationUnloaded += DestinationPresenter_OnDestinationUnloaded;
     }
 
+    
+
     private void OnDestroy()
     {
         _normcore.didConnectToRoom -= _normcore_didConnectToRoom;
+        _normcore.didDisconnectFromRoom -= _normcore_didDisconnectFromRoom;
         DestinationPresenter.OnDestinationLoaded -= DestinationPresenter_OnDestinationLoaded;
         DestinationPresenter.OnDestinationUnloaded -= DestinationPresenter_OnDestinationUnloaded;
 
@@ -42,6 +47,7 @@ public class TelepresenceRoomManager : MonoBehaviour // RealtimeComponent<Telepr
         //    model.connectedUsers.modelRemoved -= ConnectedUsers_modelRemoved;
         //}
     }
+
 
     private void DestinationPresenter_OnDestinationLoaded()
     {
@@ -56,6 +62,16 @@ public class TelepresenceRoomManager : MonoBehaviour // RealtimeComponent<Telepr
         if (!enabled) return;
         _normcore.Disconnect();
     }    
+
+    public void Connect()
+    {
+        _normcore.Connect(DestinationPresenter.CurrentDestinationId.ToString());
+    }
+
+    public void Disconnect()
+    {
+        _normcore.Disconnect();
+    }
 
     public void RegisterNetworkUser(NetworkAvatarController user)
     {
@@ -83,6 +99,13 @@ public class TelepresenceRoomManager : MonoBehaviour // RealtimeComponent<Telepr
             createNetworkSyncs();
         }
         else Debug.Log("Normcore connected, but we are not the first one here. Assuming syncs already created. Connected User Count: " + networkUsers.Count);
+
+        OnConnectionStatusChanged?.Invoke();
+    }
+
+    private void _normcore_didDisconnectFromRoom(Realtime realtime)
+    {
+        OnConnectionStatusChanged?.Invoke();
     }
 
     private void createNetworkSyncs()

@@ -20,7 +20,6 @@ public class UserListItem : MonoBehaviour
 
     public void ToggleMute()
     {
-        Debug.Log("Toggling mute for user: " + networkUser.Model.displayName);
         networkUser.IsMuted = !networkUser.IsMuted;
         MuteButton.SpriteRenderer.sprite = networkUser.IsMuted ? IsMutedIcon : IsUnmutedIcon;
     }
