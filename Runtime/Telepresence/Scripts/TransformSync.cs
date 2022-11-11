@@ -40,6 +40,11 @@ public class TransformSync : RealtimeComponent<TransformSyncModel>, INetworkSync
         RequestTransformOwnership();
     }
 
+    public void SetSpawnUrl(string Url)
+    {
+        model.spawnUrl = Url;
+    }
+
     public void RequestTransformOwnership()
     {
         NetworkItem.RequestOwnership();

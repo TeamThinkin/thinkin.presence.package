@@ -114,8 +114,11 @@ public class DispenserSync : RealtimeComponent<DispenserSyncModel>, INetworkSync
         Debug.Log("Dispenser Sync sees a new item has been dispensed: " + Item.name + ": " + Info.AssetSourceUrl);
         RequestSyncOwnership();
         model.counter = presenter.ItemCounter;
-        var itemSync = NetworkSyncFactory.FindOrCreateNetworkSync(Item, GrabbableSync.PrefabPath) as GrabbableSync;
-        Debug.Log("Setting grabbable asset url to: " + Info.AssetSourceUrl);
+        //var itemSync = NetworkSyncFactory.FindOrCreateNetworkSync(Item, GrabbableSync.PrefabPath) as GrabbableSync;
+        //Debug.Log("Setting grabbable asset url to: " + Info.AssetSourceUrl);
+        //itemSync.SetSpawnUrl(Info.AssetSourceUrl);
+
+        var itemSync = NetworkSyncFactory.FindOrCreateNetworkSync(Item, typeof(TransformSync)) as TransformSync;
         itemSync.SetSpawnUrl(Info.AssetSourceUrl);
     }
 

@@ -98,6 +98,12 @@ public static class NetworkSyncFactory
         return FindOrCreateNetworkSync(TargetItem.gameObject, mapItem.Key.PrefabPath);
     }
 
+    public static INetworkSync FindOrCreateNetworkSync(GameObject TargetItem, Type SyncType)
+    {
+        var entry = syncMappings.SingleOrDefault(i => i.Key.TargetType == SyncType);
+        return FindOrCreateNetworkSync(TargetItem, entry.Key.PrefabPath);
+    }
+
     public static INetworkSync FindOrCreateNetworkSync(GameObject TargetItem, string SyncPrefabPath)
     {
         if (!TelepresenceRoomManager.Instance.IsConnected) return null;
