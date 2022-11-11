@@ -23,10 +23,10 @@ public static class NetworkSyncFactory
     private static Dictionary<NetworkSyncInfo, List<NetworkSyncInfo>> syncMappings = new Dictionary<NetworkSyncInfo, List<NetworkSyncInfo>>()
     {
         {
-            new NetworkSyncInfo(typeof(NetworkItemSync), "Prefabs/NetworkItemSync"),
+            new NetworkSyncInfo(typeof(TransformSync), "Prefabs/Transform Sync"),
             new List<NetworkSyncInfo>(new []
             {
-                new NetworkSyncInfo(typeof(Tablet), "Prefabs/Tablet (Remote)"),
+                new NetworkSyncInfo(typeof(Tablet), "Prefabs/Tablet (Remote)"), //NOTE: this prefab path wasnt used when implementing the Tablet sync. Might not be needed
             })
         }
     };
@@ -95,7 +95,7 @@ public static class NetworkSyncFactory
 
         INetworkSync sync;
 
-        if (ExistingSyncs.ContainsKey(TargetItem.gameObject.name))
+        if (ExistingSyncs.ContainsKey(TargetItem.gameObject.name)) //NOTE: this Existing syncs is not currently kept up to date when syncs are created remotely
         {
             sync = ExistingSyncs[TargetItem.gameObject.name];
             sync.RequestSyncOwnership();

@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 164495186838888105}
   - component: {fileID: 8258008833597462657}
   m_Layer: 0
-  m_Name: NetworkItemSync
+  m_Name: Transform Sync
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

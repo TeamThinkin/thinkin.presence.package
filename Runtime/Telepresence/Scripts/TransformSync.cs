@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class NetworkItemSync : RealtimeComponent<NetworkItemSyncModel>, INetworkSync
+public class TransformSync : RealtimeComponent<NetworkItemSyncModel>, INetworkSync
 {
     //public static Dictionary<string, NetworkItemSync> Syncs { get; private set; } = new Dictionary<string, NetworkItemSync>();
     public string TargetItemName;
