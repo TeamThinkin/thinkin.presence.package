@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class TransformSync : RealtimeComponent<NetworkItemSyncModel>, INetworkSync
+public class TransformSync : RealtimeComponent<TransformSyncModel>, INetworkSync
 {
     //public static Dictionary<string, NetworkItemSync> Syncs { get; private set; } = new Dictionary<string, NetworkItemSync>();
     public string TargetItemName;
@@ -100,7 +100,7 @@ public class TransformSync : RealtimeComponent<NetworkItemSyncModel>, INetworkSy
             copyTransform(TargetItem.transform, this.transform);
     }
 
-    protected override void OnRealtimeModelReplaced(NetworkItemSyncModel previousModel, NetworkItemSyncModel currentModel)
+    protected override void OnRealtimeModelReplaced(TransformSyncModel previousModel, TransformSyncModel currentModel)
     {
         base.OnRealtimeModelReplaced(previousModel, currentModel);
         if(previousModel != null) 
@@ -111,16 +111,16 @@ public class TransformSync : RealtimeComponent<NetworkItemSyncModel>, INetworkSy
         if(currentModel != null)
         {
             Model_keyDidChange(currentModel, currentModel.key);
-            //Model_spawnUrlDidChange(currentModel, currentModel.spawnUrl);
+            Model_spawnUrlDidChange(currentModel, currentModel.spawnUrl);
 
             currentModel.keyDidChange += Model_keyDidChange;
-            //currentModel.spawnUrlDidChange += Model_spawnUrlDidChange;
+            currentModel.spawnUrlDidChange += Model_spawnUrlDidChange;
 
             //if (currentModel.key != null && !Syncs.ContainsKey(currentModel.key)) Syncs.Add(currentModel.key, this);
         }  
     }
 
-    private void Model_keyDidChange(NetworkItemSyncModel model, string key)
+    private void Model_keyDidChange(TransformSyncModel model, string key)
     {
         Debug.Log("Network Item Sync Key changed to: " + key);
         if (string.IsNullOrEmpty(key)) return;
@@ -157,24 +157,24 @@ public class TransformSync : RealtimeComponent<NetworkItemSyncModel>, INetworkSy
         //    TargetItem = null;
     }
 
-    //private async void Model_spawnUrlDidChange(NetworkItemSyncModel model, string value)
-    //{
-    //    //if(TargetItem == null && !string.IsNullOrEmpty(model.spawnUrl))
-    //    //{
-    //    //    Debug.Log("Spawning new item: " + model.spawnUrl);
+    private async void Model_spawnUrlDidChange(TransformSyncModel model, string value)
+    {
+        if (TargetItem == null && !string.IsNullOrEmpty(model.spawnUrl))
+        {
+            Debug.Log("Spawning new url item: " + model.spawnUrl);
 
-    //    //    var address = new AssetUrl(model.spawnUrl);
-    //    //    Debug.Log(address.CatalogUrl);
-    //    //    Debug.Log(address.AssetPath);
+            var address = new AssetUrl(model.spawnUrl);
+            Debug.Log(address.CatalogUrl);
+            Debug.Log(address.AssetPath);
 
-    //    //    var prefab = await AssetBundleManager.LoadPrefab(address);
-    //    //    var parentObject = GameObject.Find(model.spawnParentKey);
-    //    //    TargetItem = Instantiate(prefab, parentObject?.transform);
-    //    //    TargetItem.name = model.key;
+            var prefab = await AssetBundleManager.LoadPrefab(address);
+            var parentObject = GameObject.Find(model.spawnParentKey);
+            TargetItem = Instantiate(prefab, parentObject?.transform);
+            TargetItem.name = model.key;
 
-    //    //    //MakeGrabbable(TargetItem); //TODO: commented out during the Package refactor
-    //    //}
-    //}
+            AppControllerBase.Instance.UIManager.MakeGrabbable(TargetItem);
+        }
+    }
 
 
     private void copyTransform(Transform sourceItem, Transform destinationItem)

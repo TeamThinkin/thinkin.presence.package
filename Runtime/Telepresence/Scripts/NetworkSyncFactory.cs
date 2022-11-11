@@ -28,8 +28,17 @@ public static class NetworkSyncFactory
             {
                 new NetworkSyncInfo(typeof(Tablet), "Prefabs/Tablet (Remote)"), //NOTE: this prefab path wasnt used when implementing the Tablet sync. Might not be needed
             })
+        },
+
+        {
+            new NetworkSyncInfo(typeof(DispenserSync), "Presenters/Dispenser/Dispenser Sync"),
+            new List<NetworkSyncInfo>(new []
+            {
+                new NetworkSyncInfo(typeof(DispenserElementPresenter), "Presenters/Dispenser/Dispenser"), //NOTE: this prefab path wasnt used when implementing the Tablet sync. Might not be needed
+            })
         }
     };
+    public static Dictionary<NetworkSyncInfo, List<NetworkSyncInfo>> SyncMappings => syncMappings;
 
     //public static Dictionary<Type, NetworkSyncInfo> SyncTypes { get; private set; }
 

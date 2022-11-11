@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[NetworkSync(typeof(DispenserElementPresenter), "Presenters/Dispenser/Dispenser Sync")]
+//[NetworkSync(typeof(DispenserElementPresenter), "Presenters/Dispenser/Dispenser Sync")]
 public class DispenserSync : RealtimeComponent<DispenserSyncModel>, INetworkSync
 {
     private static Dictionary<string, DispenserSync> existingSyncs = new Dictionary<string, DispenserSync>();

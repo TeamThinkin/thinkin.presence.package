@@ -110,7 +110,21 @@ public class TelepresenceRoomManager : MonoBehaviour // RealtimeComponent<Telepr
 
     private void createNetworkSyncs()
     {
-        Debug.LogError("TODO: implement this");
+        foreach(var entry in NetworkSyncFactory.SyncMappings)
+        {
+            foreach(var infoItem in entry.Value)
+            {
+                var sceneItems = GameObject.FindObjectsOfType(infoItem.TargetType);
+                foreach(var sceneItem in sceneItems)
+                {
+                    var targetItem = (sceneItem as MonoBehaviour).gameObject;
+                    Debug.Log("Creating sync for existing scene item: " + targetItem.name);
+                    var sync = NetworkSyncFactory.FindOrCreateNetworkSync(targetItem, entry.Key.PrefabPath);
+                    sync.RequestSyncOwnership();
+                }
+            }
+        }
+
         //foreach(var entry in NetworkSyncFactory.SyncTypes)
         //{
         //    var items = GameObject.FindObjectsOfType(entry.Key);
