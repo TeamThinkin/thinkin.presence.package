@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Normal.Realtime;
 
+//NOTE: this class is no longer used. Will delete soon after a short waiting period to see if needs to come back. - mbell 11/10/22
 [RealtimeModel]
 public partial class TelepresenceRoomManagerModel
 {
