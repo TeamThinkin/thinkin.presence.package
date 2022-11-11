@@ -12,42 +12,81 @@ public static class NetworkSyncFactory
     {
         public Type TargetType;
         public string PrefabPath;
+
+        public NetworkSyncInfo(Type TargetType, string PrefabPath)
+        {
+            this.TargetType = TargetType;
+            this.PrefabPath = PrefabPath;
+        }
     }
 
-    public static Dictionary<Type, NetworkSyncInfo> SyncTypes { get; private set; }
+    private static Dictionary<NetworkSyncInfo, List<NetworkSyncInfo>> syncMappings = new Dictionary<NetworkSyncInfo, List<NetworkSyncInfo>>()
+    {
+        {
+            new NetworkSyncInfo(typeof(NetworkItemSync), "Prefabs/NetworkItemSync"),
+            new List<NetworkSyncInfo>(new []
+            {
+                new NetworkSyncInfo(typeof(Tablet), "Prefabs/Tablet (Remote)"),
+            })
+        }
+    };
+
+    //public static Dictionary<Type, NetworkSyncInfo> SyncTypes { get; private set; }
 
     public static Dictionary<string, INetworkSync> ExistingSyncs { get; private set; } = new Dictionary<string, INetworkSync>();
 
-    static NetworkSyncFactory()
+    public static void Initialize()
     {
-        SyncTypes = new Dictionary<Type, NetworkSyncInfo>();
-        DiscoverTypes(Assembly.GetExecutingAssembly());
+        //SyncTypes = new Dictionary<Type, NetworkSyncInfo>();
+        //DiscoverTypes(Assembly.GetExecutingAssembly());
+
+        ItemSpawnObserver.OnItemSpawned += ItemSpawnObserver_OnItemSpawned;
     }
 
-    public static void DiscoverTypes(Assembly SearchAssembly)
-    {
-        var types = from t in SearchAssembly.GetTypes()
-                    where !t.IsAbstract && t.GetInterfaces().Contains(typeof(INetworkSync))
-                    select t;
+    //public static void DiscoverTypes(Assembly SearchAssembly)
+    //{
+    //    var types = from t in SearchAssembly.GetTypes()
+    //                where !t.IsAbstract && t.GetInterfaces().Contains(typeof(INetworkSync))
+    //                select t;
 
-        foreach (var type in types)
-        {
-            var syncAttribute = type.GetCustomAttribute<NetworkSyncAttribute>();
-            if (syncAttribute != null)
-            {
-                var syncInfo = new NetworkSyncInfo()
-                {
-                    TargetType = type,
-                    PrefabPath = syncAttribute.PrefabPath,
-                };
+    //    foreach (var type in types)
+    //    {
+    //        var syncAttribute = type.GetCustomAttribute<NetworkSyncAttribute>();
+    //        if (syncAttribute != null)
+    //        {
+    //            var syncInfo = new NetworkSyncInfo()
+    //            {
+    //                TargetType = type,
+    //                PrefabPath = syncAttribute.SyncPrefabPath,
+    //            };
 
-                if (SyncTypes.ContainsKey(syncAttribute.TargetType))
-                    SyncTypes[syncAttribute.TargetType] = syncInfo;
-                else
-                    SyncTypes.Add(syncAttribute.TargetType, syncInfo);
+    //            if (SyncTypes.ContainsKey(syncAttribute.TargetType))
+    //                SyncTypes[syncAttribute.TargetType] = syncInfo;
+    //            else
+    //                SyncTypes.Add(syncAttribute.TargetType, syncInfo);
                 
-            }
+    //        }
+    //    }
+    //}
+
+
+    private static void ItemSpawnObserver_OnItemSpawned(GameObject TargetItem)
+    {
+        //Create spawnable network sync
+        //need to ensure that when we spawn a item that the new item doesnt create a new spawn sync and create an endless loop
+
+        var spawnableItem = TargetItem.GetComponent<ISpawnableItem>();
+        if(spawnableItem != null)
+        {
+            FindOrCreateNetworkSync(spawnableItem);
         }
+    }
+
+    public static INetworkSync FindOrCreateNetworkSync(ISpawnableItem TargetItem)
+    {
+        var itemType = TargetItem.GetType();
+        var mapItem = syncMappings.SingleOrDefault(i => i.Value.Any(j => j.TargetType == itemType));
+        return FindOrCreateNetworkSync(TargetItem.gameObject, mapItem.Key.PrefabPath);
     }
 
     public static INetworkSync FindOrCreateNetworkSync(GameObject TargetItem, string SyncPrefabPath)
