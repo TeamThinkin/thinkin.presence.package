@@ -16,6 +16,8 @@ public class TransformSync : NetworkSyncBase<TransformSyncModel>, INetworkSync
 
     override protected void Update()
     {
+        base.Update();
+
         if (!hasTargetItem) return;
         
         if (NetworkTransform.isOwnedRemotelySelf)

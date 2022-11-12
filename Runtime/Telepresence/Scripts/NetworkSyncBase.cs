@@ -69,6 +69,7 @@ public abstract class NetworkSyncBase<T> : RealtimeComponent<T>, INetworkSync wh
         {
             //Our target item has been destroyed
             Realtime.Destroy(this.gameObject);
+            hasTargetItem=false;
             return;
         }
     }
