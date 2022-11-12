@@ -22,6 +22,8 @@ public class TelepresenceRoomManager : MonoBehaviour // RealtimeComponent<Telepr
     private List<NetworkAvatarController> networkUsers = new List<NetworkAvatarController>();
     public List<NetworkAvatarController> NetworkUsers => networkUsers;
 
+    public List<INetworkSync> Syncs { get; private set; } = new List<INetworkSync>();
+
 
     private void Awake()
     {

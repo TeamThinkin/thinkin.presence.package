@@ -120,6 +120,12 @@ public class DispenserSync : RealtimeComponent<DispenserSyncModel>, INetworkSync
 
         var itemSync = NetworkSyncFactory.FindOrCreateNetworkSync(Item, typeof(TransformSync)) as TransformSync;
         itemSync.SetSpawnUrl(Info.AssetSourceUrl);
+
+        //NOTES
+        //It looks like the Dispenser is being created twice if this app is second to load.
+        //Not sure if dispenser items needed to be synced with a transform sync or if they need a more specific grabbable sync.
+        //If its the more specific then it should some how layer on top of transform sync instead of recreating the functionality
+
     }
 
     private void Presenter_OnUserInput()
