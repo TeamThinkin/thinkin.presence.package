@@ -8,11 +8,14 @@ public class RequestOwnershipOnGrab : MonoBehaviour
     private RealtimeTransform networkTransform;
     private IGrabbable grabbable;
 
-    private void Start()
+    public void SetTarget(GameObject Target)
     {
-        networkTransform = GetComponent<RealtimeTransform>();
-        grabbable = GetComponent<IGrabbable>();
-        grabbable.OnBeforeGrab += OnBeforeGrab;
+        grabbable = Target.GetComponent<IGrabbable>();
+
+        if (this.grabbable == null)
+        {
+            grabbable.OnBeforeGrab += OnBeforeGrab;
+        }
     }
 
     private void OnDestroy()
