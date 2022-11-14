@@ -24,6 +24,11 @@ public static class NetworkSyncFactory
     private static Dictionary<NetworkSyncInfo, List<NetworkSyncInfo>> syncMappings = new Dictionary<NetworkSyncInfo, List<NetworkSyncInfo>>()
     {
         {
+            new NetworkSyncInfo(typeof(GrabbableSync), "Prefabs/Grabbable Sync"),
+            new List<NetworkSyncInfo>()
+        },
+
+        {
             new NetworkSyncInfo(typeof(TransformSync), "Prefabs/Transform Sync"),
             new List<NetworkSyncInfo>(new []
             {
@@ -65,6 +70,12 @@ public static class NetworkSyncFactory
     {
         var entry = syncMappings.SingleOrDefault(i => i.Key.TargetType == SyncType);
         return FindOrCreateNetworkSync(TargetItem, entry.Key.PrefabPath);
+    }
+
+    public static T FindOrCreateNetworkSync<T>(GameObject TargetItem) where T : class
+    {
+        var entry = syncMappings.SingleOrDefault(i => i.Key.TargetType == typeof(T));
+        return FindOrCreateNetworkSync(TargetItem, entry.Key.PrefabPath) as T;
     }
 
     public static INetworkSync FindOrCreateNetworkSync(GameObject TargetItem, string SyncPrefabPath)

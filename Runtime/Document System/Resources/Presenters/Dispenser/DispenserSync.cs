@@ -89,8 +89,10 @@ public class DispenserSync : NetworkSyncBase<DispenserSyncModel>
         //Debug.Log("Setting grabbable asset url to: " + Info.AssetSourceUrl);
         //itemSync.SetSpawnUrl(Info.AssetSourceUrl);
 
-        var itemSync = NetworkSyncFactory.FindOrCreateNetworkSync(Item, typeof(TransformSync)) as TransformSync;
-        itemSync.SetSpawnUrl(Info.AssetSourceUrl);
+        //var itemSync = NetworkSyncFactory.FindOrCreateNetworkSync(Item, typeof(GrabbableSync)) as GrabbableSync; //TransformSync;
+
+        var itemSync = NetworkSyncFactory.FindOrCreateNetworkSync<GrabbableSync>(Item);
+        //itemSync.SetSpawnUrl(Info.AssetSourceUrl);
     }
 
     private void Presenter_OnUserInput()
