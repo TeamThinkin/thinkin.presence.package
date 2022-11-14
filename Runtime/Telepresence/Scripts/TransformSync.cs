@@ -20,10 +20,10 @@ public class TransformSync : NetworkSyncBase<TransformSyncModel>, INetworkSync
 
         if (!hasTargetItem) return;
         
-        if (NetworkTransform.isOwnedRemotelySelf)
-            copyTransform(this.transform, TargetItem.transform);
-        else
+        if (NetworkTransform.isOwnedLocallySelf)
             copyTransform(TargetItem.transform, this.transform);
+        else
+            copyTransform(this.transform, TargetItem.transform);
     }
 
     private void copyTransform(Transform sourceItem, Transform destinationItem)
