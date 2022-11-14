@@ -5,10 +5,10 @@ using UnityEngine;
 
 public class RequestOwnershipOnGrab : MonoBehaviour
 {
-    private RealtimeTransform networkTransform;
     private IGrabbable grabbable;
+    private INetworkSync sync;
 
-    public void SetTarget(GameObject Target)
+    public void SetTarget(GameObject Target, INetworkSync Sync)
     {
         grabbable = Target.GetComponent<IGrabbable>();
 
@@ -27,6 +27,6 @@ public class RequestOwnershipOnGrab : MonoBehaviour
     {
         if (!enabled) return;
 
-        networkTransform.RequestOwnership();
+        sync.RequestSyncOwnership();
     }
 }
