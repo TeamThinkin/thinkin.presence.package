@@ -153,6 +153,7 @@ public abstract class NetworkSyncBase<T> : RealtimeComponent<T>, INetworkSync wh
             var parentObject = GameObject.Find(model.spawnParentKey);
             TargetItem = Instantiate(prefab, parentObject?.transform);
             TargetItem.name = model.key;
+            SetTarget(TargetItem);
 
             AppControllerBase.Instance.UIManager.MakeGrabbable(TargetItem);
         }
