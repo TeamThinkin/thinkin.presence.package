@@ -12,7 +12,7 @@ public class RequestOwnershipOnGrab : MonoBehaviour
     {
         grabbable = Target.GetComponent<IGrabbable>();
 
-        if (this.grabbable == null)
+        if (this.grabbable != null)
         {
             grabbable.OnBeforeGrab += OnBeforeGrab;
         }
