@@ -89,6 +89,16 @@ public class TelepresenceRoomManager : MonoBehaviour // RealtimeComponent<Telepr
         OnUserListChanged?.Invoke();
     }
 
+    public void RegisterSync(INetworkSync NewSync)
+    {
+        if (!Syncs.Contains(NewSync)) Syncs.Add(NewSync);
+    }
+
+    public void UnregisterSync(INetworkSync OldSync)
+    {
+        if(Syncs.Contains(OldSync)) Syncs.Remove(OldSync);
+    }
+
 
     private void _normcore_didConnectToRoom(Realtime realtime)
     {

@@ -8,7 +8,7 @@ public interface ISyncModel
     string spawnItemPrefabPath { get; set; }
     string spawnUrl { get; set; }
     string spawnParentKey { get; set; }
-
+    
     public delegate void PropertyChangedHandler<in TValue>(ISyncModel model, TValue value);
     event PropertyChangedHandler<string> keyDidChange;
     event PropertyChangedHandler<string> spawnItemPrefabPathDidChange;
@@ -54,8 +54,14 @@ public abstract class NetworkSyncBase<T> : RealtimeComponent<T>, INetworkSync wh
         (model as ISyncModel).spawnUrl = Url;
     }
 
+    protected virtual void Start()
+    {
+        TelepresenceRoomManager.Instance.RegisterSync(this);
+    }
+
     protected virtual void OnDestroy()
     {
+        TelepresenceRoomManager.Instance?.UnregisterSync(this);
         if (TargetItem != null)
         {
             Destroy(TargetItem);

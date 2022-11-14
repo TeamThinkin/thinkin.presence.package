@@ -20,6 +20,7 @@ public static class NetworkSyncFactory
         }
     }
 
+    public static Dictionary<NetworkSyncInfo, List<NetworkSyncInfo>> SyncMappings => syncMappings;
     private static Dictionary<NetworkSyncInfo, List<NetworkSyncInfo>> syncMappings = new Dictionary<NetworkSyncInfo, List<NetworkSyncInfo>>()
     {
         {
@@ -38,52 +39,14 @@ public static class NetworkSyncFactory
             })
         }
     };
-    public static Dictionary<NetworkSyncInfo, List<NetworkSyncInfo>> SyncMappings => syncMappings;
-
-    //public static Dictionary<Type, NetworkSyncInfo> SyncTypes { get; private set; }
-
-    public static Dictionary<string, INetworkSync> ExistingSyncs { get; private set; } = new Dictionary<string, INetworkSync>();
 
     public static void Initialize()
     {
-        //SyncTypes = new Dictionary<Type, NetworkSyncInfo>();
-        //DiscoverTypes(Assembly.GetExecutingAssembly());
-
         ItemSpawnObserver.OnItemSpawned += ItemSpawnObserver_OnItemSpawned;
     }
 
-    //public static void DiscoverTypes(Assembly SearchAssembly)
-    //{
-    //    var types = from t in SearchAssembly.GetTypes()
-    //                where !t.IsAbstract && t.GetInterfaces().Contains(typeof(INetworkSync))
-    //                select t;
-
-    //    foreach (var type in types)
-    //    {
-    //        var syncAttribute = type.GetCustomAttribute<NetworkSyncAttribute>();
-    //        if (syncAttribute != null)
-    //        {
-    //            var syncInfo = new NetworkSyncInfo()
-    //            {
-    //                TargetType = type,
-    //                PrefabPath = syncAttribute.SyncPrefabPath,
-    //            };
-
-    //            if (SyncTypes.ContainsKey(syncAttribute.TargetType))
-    //                SyncTypes[syncAttribute.TargetType] = syncInfo;
-    //            else
-    //                SyncTypes.Add(syncAttribute.TargetType, syncInfo);
-                
-    //        }
-    //    }
-    //}
-
-
     private static void ItemSpawnObserver_OnItemSpawned(GameObject TargetItem)
     {
-        //Create spawnable network sync
-        //need to ensure that when we spawn a item that the new item doesnt create a new spawn sync and create an endless loop
-
         var spawnableItem = TargetItem.GetComponent<ISpawnableItem>();
         if(spawnableItem != null)
         {
@@ -109,10 +72,9 @@ public static class NetworkSyncFactory
         if (!TelepresenceRoomManager.Instance.IsConnected) return null;
 
         INetworkSync sync;
-
-        if (ExistingSyncs.ContainsKey(TargetItem.gameObject.name)) //NOTE: this Existing syncs is not currently kept up to date when syncs are created remotely
+        sync = TelepresenceRoomManager.Instance.Syncs.FirstOrDefault(i => i.TargetItem == TargetItem);
+        if (sync != null) 
         {
-            sync = ExistingSyncs[TargetItem.gameObject.name];
             sync.RequestSyncOwnership();
             return sync;
         }
@@ -126,4 +88,33 @@ public static class NetworkSyncFactory
         sync.RequestSyncOwnership();
         return sync;
     }
+
+
+    //public static void DiscoverTypes(Assembly SearchAssembly)
+    //{
+    //    var types = from t in SearchAssembly.GetTypes()
+    //                where !t.IsAbstract && t.GetInterfaces().Contains(typeof(INetworkSync))
+    //                select t;
+
+    //    foreach (var type in types)
+    //    {
+    //        var syncAttribute = type.GetCustomAttribute<NetworkSyncAttribute>();
+    //        if (syncAttribute != null)
+    //        {
+    //            var syncInfo = new NetworkSyncInfo()
+    //            {
+    //                TargetType = type,
+    //                PrefabPath = syncAttribute.SyncPrefabPath,
+    //            };
+
+    //            if (SyncTypes.ContainsKey(syncAttribute.TargetType))
+    //                SyncTypes[syncAttribute.TargetType] = syncInfo;
+    //            else
+    //                SyncTypes.Add(syncAttribute.TargetType, syncInfo);
+
+    //        }
+    //    }
+    //}
+
+
 }

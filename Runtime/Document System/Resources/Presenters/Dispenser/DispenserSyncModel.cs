@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using Normal.Realtime;
 using Normal.Realtime.Serialization;
+using static ISyncModel;
 
 [RealtimeModel(true)]
-public partial class DispenserSyncModel
+public partial class DispenserSyncModel: ISyncModel
 {
     [RealtimeProperty(3, true, true)]
     private string _key;
@@ -15,6 +16,21 @@ public partial class DispenserSyncModel
 
     [RealtimeProperty(2, true, true)]
     private int _counter;
+
+
+
+    [RealtimeProperty(4, true, true)]
+    private string _spawnItemPrefabPath;
+
+    [RealtimeProperty(5, true, true)]
+    private string _spawnUrl;
+
+    [RealtimeProperty(6, true, true)]
+    private string _spawnParentKey;
+
+
+    // NOTE: after regenerating you'll need to comment out this line in the generated code
+    // public delegate void PropertyChangedHandler<in T>(ISyncModel model, T value);
 }
 
 
@@ -55,14 +71,56 @@ public partial class DispenserSyncModel : RealtimeModel {
         }
     }
     
-    public delegate void PropertyChangedHandler<in T>(DispenserSyncModel model, T value);
+    public string spawnItemPrefabPath {
+        get {
+            return _spawnItemPrefabPathProperty.value;
+        }
+        set {
+            if (_spawnItemPrefabPathProperty.value == value) return;
+            _spawnItemPrefabPathProperty.value = value;
+            InvalidateReliableLength();
+            FireSpawnItemPrefabPathDidChange(value);
+        }
+    }
+    
+    public string spawnUrl {
+        get {
+            return _spawnUrlProperty.value;
+        }
+        set {
+            if (_spawnUrlProperty.value == value) return;
+            _spawnUrlProperty.value = value;
+            InvalidateReliableLength();
+            FireSpawnUrlDidChange(value);
+        }
+    }
+    
+    public string spawnParentKey {
+        get {
+            return _spawnParentKeyProperty.value;
+        }
+        set {
+            if (_spawnParentKeyProperty.value == value) return;
+            _spawnParentKeyProperty.value = value;
+            InvalidateReliableLength();
+            FireSpawnParentKeyDidChange(value);
+        }
+    }
+    
+    //public delegate void PropertyChangedHandler<in T>(DispenserSyncModel model, T value);
     public event PropertyChangedHandler<string> keyDidChange;
     public event PropertyChangedHandler<int> counterDidChange;
+    public event PropertyChangedHandler<string> spawnItemPrefabPathDidChange;
+    public event PropertyChangedHandler<string> spawnUrlDidChange;
+    public event PropertyChangedHandler<string> spawnParentKeyDidChange;
     
     public enum PropertyID : uint {
         Key = 3,
         ScrollValue = 1,
         Counter = 2,
+        SpawnItemPrefabPath = 4,
+        SpawnUrl = 5,
+        SpawnParentKey = 6,
     }
     
     #region Properties
@@ -73,17 +131,29 @@ public partial class DispenserSyncModel : RealtimeModel {
     
     private ReliableProperty<int> _counterProperty;
     
+    private ReliableProperty<string> _spawnItemPrefabPathProperty;
+    
+    private ReliableProperty<string> _spawnUrlProperty;
+    
+    private ReliableProperty<string> _spawnParentKeyProperty;
+    
     #endregion
     
     public DispenserSyncModel() : base(new MetaModel()) {
         _keyProperty = new ReliableProperty<string>(3, _key);
         _scrollValueProperty = new UnreliableProperty<float>(1, _scrollValue);
         _counterProperty = new ReliableProperty<int>(2, _counter);
+        _spawnItemPrefabPathProperty = new ReliableProperty<string>(4, _spawnItemPrefabPath);
+        _spawnUrlProperty = new ReliableProperty<string>(5, _spawnUrl);
+        _spawnParentKeyProperty = new ReliableProperty<string>(6, _spawnParentKey);
     }
     
     protected override void OnParentReplaced(RealtimeModel previousParent, RealtimeModel currentParent) {
         _keyProperty.UnsubscribeCallback();
         _counterProperty.UnsubscribeCallback();
+        _spawnItemPrefabPathProperty.UnsubscribeCallback();
+        _spawnUrlProperty.UnsubscribeCallback();
+        _spawnParentKeyProperty.UnsubscribeCallback();
     }
     
     private void FireKeyDidChange(string value) {
@@ -102,11 +172,38 @@ public partial class DispenserSyncModel : RealtimeModel {
         }
     }
     
+    private void FireSpawnItemPrefabPathDidChange(string value) {
+        try {
+            spawnItemPrefabPathDidChange?.Invoke(this, value);
+        } catch (System.Exception exception) {
+            UnityEngine.Debug.LogException(exception);
+        }
+    }
+    
+    private void FireSpawnUrlDidChange(string value) {
+        try {
+            spawnUrlDidChange?.Invoke(this, value);
+        } catch (System.Exception exception) {
+            UnityEngine.Debug.LogException(exception);
+        }
+    }
+    
+    private void FireSpawnParentKeyDidChange(string value) {
+        try {
+            spawnParentKeyDidChange?.Invoke(this, value);
+        } catch (System.Exception exception) {
+            UnityEngine.Debug.LogException(exception);
+        }
+    }
+    
     protected override int WriteLength(StreamContext context) {
         var length = MetaModelWriteLength(context);
         length += _keyProperty.WriteLength(context);
         length += _scrollValueProperty.WriteLength(context);
         length += _counterProperty.WriteLength(context);
+        length += _spawnItemPrefabPathProperty.WriteLength(context);
+        length += _spawnUrlProperty.WriteLength(context);
+        length += _spawnParentKeyProperty.WriteLength(context);
         return length;
     }
     
@@ -117,6 +214,9 @@ public partial class DispenserSyncModel : RealtimeModel {
         writes |= _keyProperty.Write(stream, context);
         writes |= _scrollValueProperty.Write(stream, context);
         writes |= _counterProperty.Write(stream, context);
+        writes |= _spawnItemPrefabPathProperty.Write(stream, context);
+        writes |= _spawnUrlProperty.Write(stream, context);
+        writes |= _spawnParentKeyProperty.Write(stream, context);
         if (writes) InvalidateContextLength(context);
     }
     
@@ -143,6 +243,21 @@ public partial class DispenserSyncModel : RealtimeModel {
                     if (changed) FireCounterDidChange(counter);
                     break;
                 }
+                case (uint) PropertyID.SpawnItemPrefabPath: {
+                    changed = _spawnItemPrefabPathProperty.Read(stream, context);
+                    if (changed) FireSpawnItemPrefabPathDidChange(spawnItemPrefabPath);
+                    break;
+                }
+                case (uint) PropertyID.SpawnUrl: {
+                    changed = _spawnUrlProperty.Read(stream, context);
+                    if (changed) FireSpawnUrlDidChange(spawnUrl);
+                    break;
+                }
+                case (uint) PropertyID.SpawnParentKey: {
+                    changed = _spawnParentKeyProperty.Read(stream, context);
+                    if (changed) FireSpawnParentKeyDidChange(spawnParentKey);
+                    break;
+                }
                 default: {
                     stream.SkipProperty();
                     break;
@@ -159,6 +274,9 @@ public partial class DispenserSyncModel : RealtimeModel {
         _key = key;
         _scrollValue = scrollValue;
         _counter = counter;
+        _spawnItemPrefabPath = spawnItemPrefabPath;
+        _spawnUrl = spawnUrl;
+        _spawnParentKey = spawnParentKey;
     }
     
 }
