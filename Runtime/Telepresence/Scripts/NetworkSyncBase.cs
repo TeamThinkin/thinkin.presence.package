@@ -41,7 +41,7 @@ public abstract class NetworkSyncBase<T> : RealtimeComponent<T>, INetworkSync wh
         hasTargetItem = true;
 
         var syncModel = model as ISyncModel;
-        syncModel.key = TargetItem.name;
+        if(syncModel.key != TargetItem.name) syncModel.key = TargetItem.name;
 
         var spawnableItem = LocalTarget.GetComponent<ISpawnableItem>();
         if (spawnableItem != null)
@@ -117,20 +117,20 @@ public abstract class NetworkSyncBase<T> : RealtimeComponent<T>, INetworkSync wh
         {
             //Item is already in the scene just need to attach to it
             Debug.Log("Item is already in the scene just need to attach to it");
-            TargetItem = existingItem;
-            hasTargetItem = true;
+            SetTarget(existingItem);
+            //TargetItem = existingItem;
+            //hasTargetItem = true;
         }
         if (!string.IsNullOrEmpty(model.spawnItemPrefabPath))
         {
             //Item is NOT already in scene AND we have a prefab path. Now we need to instantiate a local instance of it and attach sync
             Debug.Log("Spawning new local instance to go with network sync");
-            Debug.Log("Prefab path: " + model.spawnItemPrefabPath);
             var prefab = Resources.Load<GameObject>(model.spawnItemPrefabPath);
-            Debug.Log(prefab == null);
             var item = Instantiate(prefab);
             item.name = key;
-            TargetItem = item;
-            hasTargetItem = true;
+            SetTarget(item);
+            //TargetItem = item;
+            //hasTargetItem = true;
         }
         TargetItemName = TargetItem?.name;
         //if (!string.IsNullOrEmpty(model.key))

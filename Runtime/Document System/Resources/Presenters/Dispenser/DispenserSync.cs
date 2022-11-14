@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-//[NetworkSync(typeof(DispenserElementPresenter), "Presenters/Dispenser/Dispenser Sync")]
 public class DispenserSync : NetworkSyncBase<DispenserSyncModel>
 {
     private static Dictionary<string, DispenserSync> existingSyncs = new Dictionary<string, DispenserSync>();
@@ -35,7 +34,7 @@ public class DispenserSync : NetworkSyncBase<DispenserSyncModel>
         base.Update();
         if (model == null || presenter == null) return;
 
-        if(isOwnedLocallySelf)
+        if (isOwnedLocallySelf)
         {
             DebugIsOwnedLocallySelf = true;
             Model.scrollValue = presenter.Scroll;
@@ -46,7 +45,7 @@ public class DispenserSync : NetworkSyncBase<DispenserSyncModel>
             DebugIsOwnedLocallySelf = false;
             presenter.Scroll = Model.scrollValue;
             //presenter.itemCounter = sync.Model.counter;
-        }        
+        }
     }
 
     protected override void OnRealtimeModelReplaced(DispenserSyncModel previousModel, DispenserSyncModel currentModel)
@@ -72,6 +71,7 @@ public class DispenserSync : NetworkSyncBase<DispenserSyncModel>
     public override void SetTarget(GameObject LocalTarget)
     {
         base.SetTarget(LocalTarget);
+
         if(TargetItem != null)
         {
             presenter = TargetItem.GetComponent<DispenserElementPresenter>();
@@ -91,12 +91,6 @@ public class DispenserSync : NetworkSyncBase<DispenserSyncModel>
 
         var itemSync = NetworkSyncFactory.FindOrCreateNetworkSync(Item, typeof(TransformSync)) as TransformSync;
         itemSync.SetSpawnUrl(Info.AssetSourceUrl);
-
-        //NOTES
-        //It looks like the Dispenser is being created twice if this app is second to load.
-        //Not sure if dispenser items needed to be synced with a transform sync or if they need a more specific grabbable sync.
-        //If its the more specific then it should some how layer on top of transform sync instead of recreating the functionality
-
     }
 
     private void Presenter_OnUserInput()
