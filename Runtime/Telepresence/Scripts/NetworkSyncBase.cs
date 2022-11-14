@@ -28,6 +28,7 @@ public abstract class NetworkSyncBase<T> : RealtimeComponent<T>, INetworkSync wh
     public virtual void RequestSyncOwnership() 
     {
         NetworkItem.RequestOwnership();
+        this.RequestOwnership();
     }
     
     public virtual void SetTarget(GameObject LocalTarget)
