@@ -92,7 +92,7 @@ public class DispenserSync : NetworkSyncBase<DispenserSyncModel>
         //var itemSync = NetworkSyncFactory.FindOrCreateNetworkSync(Item, typeof(GrabbableSync)) as GrabbableSync; //TransformSync;
 
         var itemSync = NetworkSyncFactory.FindOrCreateNetworkSync<GrabbableSync>(Item);
-        //itemSync.SetSpawnUrl(Info.AssetSourceUrl);
+        itemSync.SetSpawnUrl(Info.AssetSourceUrl);
     }
 
     private void Presenter_OnUserInput()
