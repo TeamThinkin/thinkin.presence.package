@@ -1,6 +1,7 @@
 using Normal.Realtime;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class RequestOwnershipOnGrab : MonoBehaviour
@@ -8,13 +9,14 @@ public class RequestOwnershipOnGrab : MonoBehaviour
     private IGrabbable grabbable;
     private INetworkSync sync;
 
-    public void SetTarget(GameObject Target, INetworkSync Sync)
+    public void SetTarget(GameObject Target)
     {
         grabbable = Target.GetComponent<IGrabbable>();
 
         if (this.grabbable != null)
         {
-            grabbable.OnBeforeGrab += OnBeforeGrab;
+            sync = TelepresenceRoomManager.Instance.Syncs.FirstOrDefault(i => i.TargetItem == Target);
+            if(sync != null) grabbable.OnBeforeGrab += OnBeforeGrab;
         }
     }
 
