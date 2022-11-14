@@ -22,7 +22,7 @@ public class RequestOwnershipOnGrab : MonoBehaviour
 
     private void OnDestroy()
     {
-        grabbable.OnBeforeGrab -= OnBeforeGrab;
+        if(grabbable != null) grabbable.OnBeforeGrab -= OnBeforeGrab;
     }
 
     private void OnBeforeGrab(IGrabber grabber, IGrabbable grabbable)
