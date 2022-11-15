@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class TelepresenceRoomManager : MonoBehaviour // RealtimeComponent<TelepresenceRoomManagerModel>
+public class TelepresenceRoomManager : MonoBehaviour
 {
     public event Action OnUserListChanged;
     public event Action OnConnectionStatusChanged;
@@ -42,12 +42,6 @@ public class TelepresenceRoomManager : MonoBehaviour // RealtimeComponent<Telepr
         _normcore.didDisconnectFromRoom -= _normcore_didDisconnectFromRoom;
         DestinationPresenter.OnDestinationLoaded -= DestinationPresenter_OnDestinationLoaded;
         DestinationPresenter.OnDestinationUnloaded -= DestinationPresenter_OnDestinationUnloaded;
-
-        //if (model != null)
-        //{
-        //    model.connectedUsers.modelAdded -= ConnectedUsers_modelAdded;
-        //    model.connectedUsers.modelRemoved -= ConnectedUsers_modelRemoved;
-        //}
     }
 
 
@@ -102,8 +96,7 @@ public class TelepresenceRoomManager : MonoBehaviour // RealtimeComponent<Telepr
 
     private void _normcore_didConnectToRoom(Realtime realtime)
     {
-        //bool isFirstOneHere = !model.connectedUsers.Any(i => i.clientId != this.ClientId);
-        bool isFirstOneHere = networkUsers.Count <= 1; //networkUsers.Any(i => i.Model.clientId != this.ClientId);
+        bool isFirstOneHere = networkUsers.Count <= 1;
         
         if (isFirstOneHere)
         {
@@ -130,50 +123,10 @@ public class TelepresenceRoomManager : MonoBehaviour // RealtimeComponent<Telepr
                 foreach(var sceneItem in sceneItems)
                 {
                     var targetItem = (sceneItem as MonoBehaviour).gameObject;
-                    Debug.Log("Creating sync for existing scene item: " + targetItem.name);
                     var sync = NetworkSyncFactory.FindOrCreateNetworkSync(targetItem, entry.Key.PrefabPath);
                     sync.RequestSyncOwnership();
                 }
             }
         }
-
-        //foreach(var entry in NetworkSyncFactory.SyncTypes)
-        //{
-        //    var items = GameObject.FindObjectsOfType(entry.Key);
-        //    foreach(var item in items)
-        //    {
-        //        var targetItem = (item as MonoBehaviour).gameObject;
-        //        var sync = NetworkSyncFactory.FindOrCreateNetworkSync(targetItem, entry.Value.PrefabPath);
-        //        sync.RequestSyncOwnership();
-        //    }
-        //}
     }
-    
-
-    //protected override void OnRealtimeModelReplaced(TelepresenceRoomManagerModel previousModel, TelepresenceRoomManagerModel currentModel)
-    //{
-    //    base.OnRealtimeModelReplaced(previousModel, currentModel);
-
-    //    if(previousModel != null)
-    //    {
-    //        previousModel.connectedUsers.modelAdded -= ConnectedUsers_modelAdded;
-    //        previousModel.connectedUsers.modelRemoved -= ConnectedUsers_modelRemoved;
-    //    }
-
-    //    if(currentModel != null)
-    //    {
-    //        currentModel.connectedUsers.modelAdded += ConnectedUsers_modelAdded;
-    //        currentModel.connectedUsers.modelRemoved += ConnectedUsers_modelRemoved;
-    //    }
-    //}
-
-    //private void ConnectedUsers_modelRemoved(Normal.Realtime.Serialization.RealtimeSet<UserInfoModel> set, UserInfoModel model, bool remote)
-    //{
-    //    OnUserListChanged?.Invoke();
-    //}
-
-    //private void ConnectedUsers_modelAdded(Normal.Realtime.Serialization.RealtimeSet<UserInfoModel> set, UserInfoModel model, bool remote)
-    //{
-    //    OnUserListChanged?.Invoke();
-    //}
 }
