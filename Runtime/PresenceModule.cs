@@ -5,6 +5,7 @@ public static class PresenceModule
 {
     public static void Initialize()
     {
+        NetworkSyncFactory.Initialize();
         AppControllerBase.Instance.UIManager.OnMakeGrabbable += UIManager_OnMakeGrabbable;
     }
 
