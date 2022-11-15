@@ -5,13 +5,9 @@ using UnityEngine;
 
 public class DispenserSync : NetworkSyncBase<DispenserSyncModel>
 {
-    private static Dictionary<string, DispenserSync> existingSyncs = new Dictionary<string, DispenserSync>();
-
     private DispenserElementPresenter presenter;
 
     public DispenserSyncModel Model => model;
-
-    public bool DebugIsOwnedLocallySelf;
 
     override protected void OnDestroy()
     {
@@ -36,15 +32,13 @@ public class DispenserSync : NetworkSyncBase<DispenserSyncModel>
 
         if (isOwnedLocallySelf)
         {
-            DebugIsOwnedLocallySelf = true;
             Model.scrollValue = presenter.Scroll;
-            //Model.counter = presenter.itemCounter;
+            Model.counter = presenter.ItemCounter;
         }
         else
         {
-            DebugIsOwnedLocallySelf = false;
             presenter.Scroll = Model.scrollValue;
-            //presenter.itemCounter = sync.Model.counter;
+            presenter.ItemCounter = Model.counter;
         }
     }
 
@@ -82,15 +76,9 @@ public class DispenserSync : NetworkSyncBase<DispenserSyncModel>
 
     private void Presenter_OnItemDispensed(GameObject Item, DispenserElementPresenter.ItemInfo Info)
     {
-        Debug.Log("Dispenser Sync sees a new item has been dispensed: " + Item.name + ": " + Info.AssetSourceUrl);
         RequestSyncOwnership();
         model.counter = presenter.ItemCounter;
-        //var itemSync = NetworkSyncFactory.FindOrCreateNetworkSync(Item, GrabbableSync.PrefabPath) as GrabbableSync;
-        //Debug.Log("Setting grabbable asset url to: " + Info.AssetSourceUrl);
-        //itemSync.SetSpawnUrl(Info.AssetSourceUrl);
-
-        //var itemSync = NetworkSyncFactory.FindOrCreateNetworkSync(Item, typeof(GrabbableSync)) as GrabbableSync; //TransformSync;
-
+        
         var itemSync = NetworkSyncFactory.FindOrCreateNetworkSync<GrabbableSync>(Item);
         itemSync.SetSpawnUrl(Info.AssetSourceUrl);
     }
