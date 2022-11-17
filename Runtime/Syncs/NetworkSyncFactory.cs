@@ -63,7 +63,7 @@ public static class NetworkSyncFactory
     {
         var itemType = TargetItem.GetType();
         var mapItem = syncMappings.SingleOrDefault(i => i.Value.Any(j => j.TargetType == itemType));
-        return FindOrCreateNetworkSync(TargetItem.gameObject, mapItem.Key.PrefabPath);
+        return FindOrCreateNetworkSync(TargetItem.gameObject, mapItem.Key.PrefabPath, TargetItem.DestroyWhenOwnerLeaves);
     }
 
     public static INetworkSync FindOrCreateNetworkSync(GameObject TargetItem, Type SyncType)
@@ -78,7 +78,7 @@ public static class NetworkSyncFactory
         return FindOrCreateNetworkSync(TargetItem, entry.Key.PrefabPath) as T;
     }
 
-    public static INetworkSync FindOrCreateNetworkSync(GameObject TargetItem, string SyncPrefabPath)
+    public static INetworkSync FindOrCreateNetworkSync(GameObject TargetItem, string SyncPrefabPath, bool DestroyWhenOwnerLeaves = false)
     {
         if (!TelepresenceRoomManager.Instance.IsConnected) return null;
 
@@ -92,7 +92,7 @@ public static class NetworkSyncFactory
 
         var options = Realtime.InstantiateOptions.defaults;
         options.ownedByClient = true;
-        options.destroyWhenOwnerLeaves = false;
+        options.destroyWhenOwnerLeaves = DestroyWhenOwnerLeaves;
 
         sync = Realtime.Instantiate(SyncPrefabPath, options).GetComponent<INetworkSync>();
         sync.SetTarget(TargetItem);

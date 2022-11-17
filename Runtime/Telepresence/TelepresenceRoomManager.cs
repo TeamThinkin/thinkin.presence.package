@@ -25,40 +25,6 @@ public class TelepresenceRoomManager : MonoBehaviour
     public List<INetworkSync> Syncs { get; private set; } = new List<INetworkSync>();
 
 
-    private void Awake()
-    {
-        Instance = this;
-        _normcore.didConnectToRoom += _normcore_didConnectToRoom;
-        _normcore.didDisconnectFromRoom += _normcore_didDisconnectFromRoom;
-        DestinationPresenter.OnDestinationLoaded += DestinationPresenter_OnDestinationLoaded;
-        DestinationPresenter.OnDestinationUnloaded += DestinationPresenter_OnDestinationUnloaded;
-    }
-
-    
-
-    private void OnDestroy()
-    {
-        _normcore.didConnectToRoom -= _normcore_didConnectToRoom;
-        _normcore.didDisconnectFromRoom -= _normcore_didDisconnectFromRoom;
-        DestinationPresenter.OnDestinationLoaded -= DestinationPresenter_OnDestinationLoaded;
-        DestinationPresenter.OnDestinationUnloaded -= DestinationPresenter_OnDestinationUnloaded;
-    }
-
-
-    private void DestinationPresenter_OnDestinationLoaded()
-    {
-        if (!enabled) return;
-        if (DestinationPresenter.CurrentDestinationId == null) return;
-
-        _normcore.Connect(DestinationPresenter.CurrentDestinationId.ToString());
-    }
-
-    private void DestinationPresenter_OnDestinationUnloaded()
-    {
-        if (!enabled) return;
-        _normcore.Disconnect();
-    }    
-
     public void Connect()
     {
         _normcore.Connect(DestinationPresenter.CurrentDestinationId.ToString());
@@ -90,9 +56,71 @@ public class TelepresenceRoomManager : MonoBehaviour
 
     public void UnregisterSync(INetworkSync OldSync)
     {
-        if(Syncs.Contains(OldSync)) Syncs.Remove(OldSync);
+        if (Syncs.Contains(OldSync)) Syncs.Remove(OldSync);
     }
 
+
+    private void Awake()
+    {
+        Instance = this;
+
+        PlayerIdleMonitor.OnIdleEnd += PlayerIdleMonitor_OnIdleEnd;
+        PlayerIdleMonitor.OnAbandonStart += PlayerIdleMonitor_OnAbandonStart;
+        _normcore.didConnectToRoom += _normcore_didConnectToRoom;
+        _normcore.didDisconnectFromRoom += _normcore_didDisconnectFromRoom;
+        DestinationPresenter.OnDestinationLoaded += DestinationPresenter_OnDestinationLoaded;
+        DestinationPresenter.OnDestinationUnloaded += DestinationPresenter_OnDestinationUnloaded;
+
+        InvokeRepeating("checkConnection", 1, 10);
+    }
+
+    private void OnDestroy()
+    {
+        PlayerIdleMonitor.OnIdleEnd -= PlayerIdleMonitor_OnIdleEnd;
+        PlayerIdleMonitor.OnAbandonStart -= PlayerIdleMonitor_OnAbandonStart;
+        _normcore.didConnectToRoom -= _normcore_didConnectToRoom;
+        _normcore.didDisconnectFromRoom -= _normcore_didDisconnectFromRoom;
+        DestinationPresenter.OnDestinationLoaded -= DestinationPresenter_OnDestinationLoaded;
+        DestinationPresenter.OnDestinationUnloaded -= DestinationPresenter_OnDestinationUnloaded;
+    }
+
+    private void PlayerIdleMonitor_OnAbandonStart()
+    {
+        Debug.Log("Player abandoned app. Disconnecting...");
+        Disconnect();
+    }
+
+    private void checkConnection()
+    {
+        if (!PlayerIdleMonitor.IsAbandoned && !_normcore.connected && !_normcore.connecting && DestinationPresenter.CurrentDestinationId.HasValue && !DestinationPresenter.Instance.IsLoading)
+        {
+            Debug.Log("Looks like we are disconnected. Reconnecting...");
+            Connect();
+        }
+    }
+
+    private void PlayerIdleMonitor_OnIdleEnd()
+    {
+        if (!_normcore.connected && !_normcore.connecting)
+        {
+            Debug.Log("Player no longer idle. Reconnecting...");
+            Connect();
+        }
+    }
+
+    private void DestinationPresenter_OnDestinationLoaded()
+    {
+        if (!enabled) return;
+        if (DestinationPresenter.CurrentDestinationId == null) return;
+
+        _normcore.Connect(DestinationPresenter.CurrentDestinationId.ToString());
+    }
+
+    private void DestinationPresenter_OnDestinationUnloaded()
+    {
+        if (!enabled) return;
+        _normcore.Disconnect();
+    }    
 
     private void _normcore_didConnectToRoom(Realtime realtime)
     {

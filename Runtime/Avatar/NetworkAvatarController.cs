@@ -28,12 +28,6 @@ public class NetworkAvatarController : RealtimeComponent<UserInfoModel>
         set { Voice.mute = value; }
     }
 
-    //public bool IsMuted
-    //{
-    //    get { return MouthAudioSource.mute; }
-    //    set { MouthAudioSource.mute = value; }
-    //}
-
     private void Awake()
     {
         LocalAvatarManager.Instance.OnCurrentSkinLoaded += LocalAvatarManager_OnCurrentSkinLoaded;
