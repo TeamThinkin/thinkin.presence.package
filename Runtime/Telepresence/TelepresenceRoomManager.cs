@@ -96,6 +96,8 @@ public class TelepresenceRoomManager : MonoBehaviour
 
     private void checkConnection()
     {
+        if (!isAutoReconnectEnabled) return;
+
         if (!PlayerIdleMonitor.IsAbandoned && !_normcore.connected && !_normcore.connecting && DestinationPresenter.CurrentDestinationId.HasValue && !DestinationPresenter.Instance.IsLoading)
         {
             Debug.Log("Looks like we are disconnected. Reconnecting...");
@@ -105,7 +107,7 @@ public class TelepresenceRoomManager : MonoBehaviour
 
     private void PlayerIdleMonitor_OnIdleEnd()
     {
-        if (!_normcore.connected && !_normcore.connecting)
+        if (!_normcore.connected && !_normcore.connecting && isAutoReconnectEnabled)
         {
             Debug.Log("Player no longer idle. Reconnecting...");
             Connect();
