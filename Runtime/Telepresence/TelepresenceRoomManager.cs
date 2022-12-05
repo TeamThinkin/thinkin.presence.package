@@ -24,14 +24,18 @@ public class TelepresenceRoomManager : MonoBehaviour
 
     public List<INetworkSync> Syncs { get; private set; } = new List<INetworkSync>();
 
+    private bool isAutoReconnectEnabled = true;
+
 
     public void Connect()
     {
+        isAutoReconnectEnabled = true;
         _normcore.Connect(DestinationPresenter.CurrentDestinationId.ToString());
     }
 
-    public void Disconnect()
+    public void Disconnect(bool stayDisconnected = false)
     {
+        isAutoReconnectEnabled = !stayDisconnected;
         _normcore.Disconnect();
     }
 

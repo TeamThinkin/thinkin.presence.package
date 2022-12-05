@@ -14,7 +14,7 @@ public class PresencePanel : TabPanel
     public void ToggleConnection()
     {
         if (TelepresenceRoomManager.Instance.IsConnected)
-            TelepresenceRoomManager.Instance.Disconnect();
+            TelepresenceRoomManager.Instance.Disconnect(true);
         else
             TelepresenceRoomManager.Instance.Connect();
     }
