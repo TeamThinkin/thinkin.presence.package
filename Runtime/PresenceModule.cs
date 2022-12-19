@@ -11,7 +11,10 @@ public static class PresenceModule
 
     private static void UIManager_OnMakeGrabbable(GameObject Item)
     {
-        var comp = Item.AddComponent<RequestOwnershipOnGrab>();
-        comp.SetTarget(Item);
+        if (Item.GetComponent<RequestOwnershipOnGrab>() == null)
+        {
+            var comp = Item.AddComponent<RequestOwnershipOnGrab>();
+            comp.SetTarget(Item);
+        }
     }
 }

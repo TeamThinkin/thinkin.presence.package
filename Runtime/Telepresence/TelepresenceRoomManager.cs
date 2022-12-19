@@ -9,6 +9,7 @@ public class TelepresenceRoomManager : MonoBehaviour
 {
     public event Action OnUserListChanged;
     public event Action OnConnectionStatusChanged;
+    public event Action<INetworkSync> OnSyncAdded;
 
     public static TelepresenceRoomManager Instance { get; private set; }
 
@@ -55,7 +56,11 @@ public class TelepresenceRoomManager : MonoBehaviour
 
     public void RegisterSync(INetworkSync NewSync)
     {
-        if (!Syncs.Contains(NewSync)) Syncs.Add(NewSync);
+        if (!Syncs.Contains(NewSync))
+        {
+            Syncs.Add(NewSync);
+            OnSyncAdded?.Invoke(NewSync);
+        }
     }
 
     public void UnregisterSync(INetworkSync OldSync)
@@ -130,7 +135,7 @@ public class TelepresenceRoomManager : MonoBehaviour
 
     private void _normcore_didConnectToRoom(Realtime realtime)
     {
-        bool isFirstOneHere = networkUsers.Count <= 1;
+        bool isFirstOneHere = !networkUsers.Any(i => !i.IsLocalUser);
         
         if (isFirstOneHere)
         {

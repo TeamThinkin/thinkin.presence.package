@@ -15,20 +15,38 @@ public class RequestOwnershipOnGrab : MonoBehaviour
 
         if (this.grabbable != null)
         {
+            grabbable.OnBeforeGrab += OnBeforeGrab;
+
             sync = TelepresenceRoomManager.Instance.Syncs.FirstOrDefault(i => i.TargetItem == Target);
-            if(sync != null) grabbable.OnBeforeGrab += OnBeforeGrab;
+            if (sync == null)
+            { 
+                //No Sync for our object right now. Listen to see if one gets created later
+                TelepresenceRoomManager.Instance.OnSyncAdded += Instance_OnSyncAdded;
+            }
+        }
+    }
+
+    private void Instance_OnSyncAdded(INetworkSync NewSync)
+    {
+        if (NewSync.TargetItem == this.gameObject)
+        {
+            sync = NewSync;
+            TelepresenceRoomManager.Instance.OnSyncAdded -= Instance_OnSyncAdded;
         }
     }
 
     private void OnDestroy()
     {
-        if(grabbable != null) grabbable.OnBeforeGrab -= OnBeforeGrab;
+        if (grabbable != null) grabbable.OnBeforeGrab -= OnBeforeGrab;
     }
 
     private void OnBeforeGrab(IGrabber grabber, IGrabbable grabbable)
     {
         if (!enabled) return;
 
-        sync.RequestSyncOwnership();
+        if (sync != null)
+        {
+            sync.RequestSyncOwnership();
+        }
     }
 }
