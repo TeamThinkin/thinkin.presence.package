@@ -25,11 +25,13 @@ public class TelepresenceRoomManager : MonoBehaviour
 
     public List<INetworkSync> Syncs { get; private set; } = new List<INetworkSync>();
 
-    private bool isAutoReconnectEnabled = true;
+    private bool isAutoReconnectEnabled = false;
 
 
     public void Connect()
     {
+        if (!DestinationPresenter.CurrentDestinationId.HasValue) return; //No reason to connect if we are in a local scene with no destination
+
         isAutoReconnectEnabled = true;
         _normcore.Connect(DestinationPresenter.CurrentDestinationId.ToString());
     }
