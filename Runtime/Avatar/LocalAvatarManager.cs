@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class LocalAvatarManager : MonoBehaviour, IProvideHandData
 {
-    //private const string defaultAvatarUrl = "https://d1a370nemizbjq.cloudfront.net/4b5de172-a231-4695-a21f-39004feaa54b.glb";
+    private const string defaultAvatarUrl = "https://models.readyplayer.me/6400d536a327e1f2e59a2b5e.glb";
     public static LocalAvatarManager Instance { get; private set; }
 
     [SerializeField] private Transform RightHandAnchor;
@@ -50,7 +50,9 @@ public class LocalAvatarManager : MonoBehaviour, IProvideHandData
 
     private async void updateSkin()
     {
-        if (UserInfo.CurrentUser != UserInfo.UnknownUser)
+        if (UserInfo.CurrentUser.AvatarUrl.IsNullOrEmpty()) UserInfo.CurrentUser.AvatarUrl = defaultAvatarUrl; //TODO: this should be replaced with a locally available model
+
+        if (!UserInfo.CurrentUser.AvatarUrl.IsNullOrEmpty())
         {
             if (currentAvatarUrl == UserInfo.CurrentUser.AvatarUrl) return;
             destroyCurrentSkin();
@@ -65,10 +67,10 @@ public class LocalAvatarManager : MonoBehaviour, IProvideHandData
         {
             if (isCurrentSkinDefault) return;
             destroyCurrentSkin();
-
             isCurrentSkinDefault = true;
             currentAvatarUrl = null;
             currentSkin = Instantiate(DefaultAvatar).GetComponent<SkinController>();
+            Debug.Log("Current skin: " + currentSkin, currentSkin.gameObject);
             DontDestroyOnLoad(currentSkin);
             currentSkin.SetSourceData(true, HeadAnchor, LeftHandAnchor, RightHandAnchor, LeftAvatarHand, RightAvatarHand);
             OnCurrentSkinLoaded?.Invoke();
