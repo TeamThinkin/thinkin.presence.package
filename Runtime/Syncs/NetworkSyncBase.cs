@@ -40,13 +40,15 @@ public abstract class NetworkSyncBase<T> : RealtimeComponent<T>, INetworkSync wh
 
     protected virtual void Start()
     {
+        ItemSpawnObserver.OnItemDespawned += ItemSpawnObserver_OnItemDespawned;
         TelepresenceRoomManager.Instance.RegisterSync(this);
     }
 
     protected virtual void OnDestroy()
     {
+        ItemSpawnObserver.OnItemDespawned -= ItemSpawnObserver_OnItemDespawned;
         TelepresenceRoomManager.Instance?.UnregisterSync(this);
-        if (TargetItem != null)
+        if (hasTargetItem && TargetItem != null)
         {
             Destroy(TargetItem);
         }
@@ -58,12 +60,24 @@ public abstract class NetworkSyncBase<T> : RealtimeComponent<T>, INetworkSync wh
         if (TargetItem == null)
         {
             //Our target item has been destroyed
-            Realtime.Destroy(this.gameObject);
-            hasTargetItem=false;
+            OnTargetItemDestroyed();
             return;
         }
     }
 
+    private void ItemSpawnObserver_OnItemDespawned(GameObject Item)
+    {
+        if (TargetItem == null) return;
+        if (Item != TargetItem) return;
+
+        OnTargetItemDestroyed();
+    }
+
+    protected void OnTargetItemDestroyed()
+    {
+        hasTargetItem = false;
+        Realtime.Destroy(this.gameObject);
+    }
 
     protected override void OnRealtimeModelReplaced(T previousModel, T currentModel)
     {
