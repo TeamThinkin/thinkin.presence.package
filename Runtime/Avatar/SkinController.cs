@@ -66,6 +66,18 @@ public class SkinController : MonoBehaviour
 
     private void Update()
     {
+        updateFingerPose();
+        updateBodyPosition();
+    }
+
+    private void LateUpdate()
+    {
+        updateBodyPosition();
+        updateConstrainedItems();
+    }
+
+    private void updateFingerPose()
+    {
         if (leftHandDataProvider != null)
         {
             leftHandData = leftHandDataProvider.GetHandData();
@@ -74,13 +86,6 @@ public class SkinController : MonoBehaviour
             updateFingersFromData(leftFingers, leftHandData);
             updateFingersFromData(rightFingers, rightHandData);
         }
-
-        updateBodyPosition();
-    }
-
-    private void LateUpdate()
-    {
-        updateBodyPosition();
     }
 
     private void updateFingersFromData(Fingers fingers, AvatarHandData handData)
@@ -250,6 +255,7 @@ public class SkinController : MonoBehaviour
         headBone = skin.transform.Find("Armature/Hips/Spine/Neck/Head");
         neckHeadOffset = neckBone.position - headBone.position;
 
+        constraints.Clear();
         addParentConstraint(skin, "Armature/Hips/Spine/RightHand", rightHandTransform, new Vector3(180, 90, 90));
         addParentConstraint(skin, "Armature/Hips/Spine/LeftHand", leftHandTransform, new Vector3(0, 90, 90));
         addParentConstraint(skin, "Armature/Hips/Spine/Neck/Head", headTransform, Vector3.zero);
@@ -259,10 +265,30 @@ public class SkinController : MonoBehaviour
     {
         var bone = skin.transform.Find(bonePath);
         var constraint = bone.gameObject.AddComponent<ParentConstraint>();
-        var constraintList = new List<ConstraintSource>();
-        constraintList.Add(new ConstraintSource() { sourceTransform = anchor, weight = 1 });
-        constraint.SetSources(constraintList);
-        constraint.rotationOffsets = new[] { rotationOffset };
-        constraint.constraintActive = true;
+        var rotation = Quaternion.Euler(rotationOffset);
+        constraints.Add(new Tuple<Transform, Transform, Quaternion>(bone, anchor, rotation));
     }
+
+    private void updateConstrainedItems()
+    {
+        foreach(var item in constraints)
+        {
+            item.Item1.position = item.Item2.position;
+            item.Item1.rotation = item.Item2.rotation * item.Item3;
+        }
+        
+    }
+
+    private List<Tuple<Transform, Transform, Quaternion>> constraints = new List<Tuple<Transform, Transform, Quaternion>>();
+
+    //private void addParentConstraint(GameObject skin, string bonePath, Transform anchor, Vector3 rotationOffset)
+    //{
+    //    var bone = skin.transform.Find(bonePath);
+    //    var constraint = bone.gameObject.AddComponent<ParentConstraint>();
+    //    var constraintList = new List<ConstraintSource>();
+    //    constraintList.Add(new ConstraintSource() { sourceTransform = anchor, weight = 1 });
+    //    constraint.SetSources(constraintList);
+    //    constraint.rotationOffsets = new[] { rotationOffset };
+    //    constraint.constraintActive = true;
+    //}
 }
