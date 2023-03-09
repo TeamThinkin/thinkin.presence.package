@@ -37,6 +37,7 @@ public class RequestOwnershipOnGrab : MonoBehaviour
 
     private void OnDestroy()
     {
+        TelepresenceRoomManager.Instance.OnSyncAdded -= Instance_OnSyncAdded;
         if (grabbable != null) grabbable.OnBeforeGrab -= OnBeforeGrab;
     }
 

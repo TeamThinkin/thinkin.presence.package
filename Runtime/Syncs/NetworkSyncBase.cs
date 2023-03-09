@@ -10,6 +10,7 @@ public abstract class NetworkSyncBase<T> : RealtimeComponent<T>, INetworkSync wh
 
     public GameObject TargetItem { get; protected set; }
     protected bool hasTargetItem;
+    protected ISpawnableItem spawnedItem;
 
     public virtual void RequestSyncOwnership() 
     {
@@ -26,10 +27,10 @@ public abstract class NetworkSyncBase<T> : RealtimeComponent<T>, INetworkSync wh
         var syncModel = model as ISyncModel;
         if(syncModel.key != TargetItem.name) syncModel.key = TargetItem.name;
 
-        var spawnableItem = LocalTarget.GetComponent<ISpawnableItem>();
-        if (spawnableItem != null)
+        spawnedItem = LocalTarget.GetComponent<ISpawnableItem>();
+        if (spawnedItem != null)
         {
-            syncModel.spawnItemPrefabPath = spawnableItem.PrefabPath;
+            syncModel.spawnItemPrefabPath = spawnedItem.PrefabPath;
         }
     }
 
@@ -47,10 +48,20 @@ public abstract class NetworkSyncBase<T> : RealtimeComponent<T>, INetworkSync wh
     protected virtual void OnDestroy()
     {
         ItemSpawnObserver.OnItemDespawned -= ItemSpawnObserver_OnItemDespawned;
+        Debug.Log("Unregistering sync");
         TelepresenceRoomManager.Instance?.UnregisterSync(this);
         if (hasTargetItem && TargetItem != null)
         {
-            Destroy(TargetItem);
+            if(spawnedItem != null && spawnedItem.DeactiveTargetOnSyncDestroy)
+            {
+                Debug.Log("Deactivating target item");
+                TargetItem.SetActive(false);
+            }
+            else
+            {
+                Debug.Log("Actually Destroying syncs target item");
+                Destroy(TargetItem);
+            }
         }
     }
 
@@ -75,6 +86,7 @@ public abstract class NetworkSyncBase<T> : RealtimeComponent<T>, INetworkSync wh
 
     protected void OnTargetItemDestroyed()
     {
+        Debug.Log("Destroying network sync");
         hasTargetItem = false;
         Realtime.Destroy(this.gameObject);
     }
