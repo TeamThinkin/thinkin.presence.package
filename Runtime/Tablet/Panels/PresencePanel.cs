@@ -21,7 +21,7 @@ public class PresencePanel : TabPanel
 
     public void OnLogoutButtonPressed()
     {
-        DeviceRegistrationController.Logout();
+        CoreModule.LogoutUser();
     }
 
     private void OnEnable()
