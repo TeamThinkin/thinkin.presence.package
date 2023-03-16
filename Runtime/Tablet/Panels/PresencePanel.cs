@@ -19,6 +19,11 @@ public class PresencePanel : TabPanel
             TelepresenceRoomManager.Instance.Connect();
     }
 
+    public void OnLogoutButtonPressed()
+    {
+        DeviceRegistrationController.Logout();
+    }
+
     private void OnEnable()
     {
         TelepresenceRoomManager.Instance.OnConnectionStatusChanged += Instance_OnConnectionStatusChanged;
